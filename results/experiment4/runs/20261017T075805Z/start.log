@@ -1,0 +1,6 @@
+run_dir=/home/public/Workspace/Code/Project/Embodied_AI/Visual/SLAM_ORB/results/experiment4/runs/20261017T075805Z
+cuda_architectures=120
+build_jobs=4
+NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running.
+
+错误：NVIDIA 驱动未连接可用 GPU；本次不退回 CPU。

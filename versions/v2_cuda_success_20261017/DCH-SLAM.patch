@@ -1,0 +1,345 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7037154..cb89e79 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -175,6 +175,11 @@ add_executable(rgbd_tum
+         Examples/RGB-D/rgbd_tum.cc)
+ target_link_libraries(rgbd_tum ${PROJECT_NAME})
+ 
++# SLAM_ORB: optional example targets begin
++option(DCH_BUILD_EXTRA_EXAMPLES "Build additional DCH-SLAM example targets" ON)
++if(DCH_BUILD_EXTRA_EXAMPLES)
++
++
+ if(realsense2_FOUND)
+     add_executable(rgbd_realsense_D435i
+             Examples/RGB-D/rgbd_realsense_D435i.cc)
+@@ -418,3 +423,5 @@ if(realsense2_FOUND)
+             Examples_old/Stereo-Inertial/stereo_inertial_realsense_D435i.cc)
+     target_link_libraries(stereo_inertial_realsense_D435i_old ${PROJECT_NAME})
+ endif()
++# SLAM_ORB: optional example targets end
++endif() # DCH_BUILD_EXTRA_EXAMPLES
+diff --git a/src/ORBmatcher.cc b/src/ORBmatcher.cc
+index 1d6cecb..9d794dd 100644
+--- a/src/ORBmatcher.cc
++++ b/src/ORBmatcher.cc
+@@ -19,6 +19,8 @@
+ 
+ #include "ORBmatcher.h"
+ 
++#include <algorithm>
++#include <cmath>
+ #include<limits.h>
+ 
+ #include<opencv2/core/core.hpp>
+@@ -2021,7 +2023,8 @@ namespace ORB_SLAM3
+         CurrentFrame.mvpMapPoints.clear();
+ 
+         // Get key points and map points from last frame
+-        for (int i=0; i < LastFrame.mvpMapPoints.size(); ++i)
++        const size_t nLastMapPoints = std::min(LastFrame.mvpMapPoints.size(), LastFrame.mvKeysUn.size());
++        for (size_t i=0; i < nLastMapPoints; ++i)
+         {
+             if (LastFrame.mvpMapPoints[i] && LastFrame.mvpMapPoints[i]->Observations()>=3)
+             {   
+@@ -2030,6 +2033,15 @@ namespace ORB_SLAM3
+             }
+         }
+ 
++        // A lost frame can have no persistent map points. OpenCV's LK routine
++        // rejects an empty std::vector<Point2f>, so let the caller use its
++        // normal keyframe/relocalization path instead.
++        if (lastKeyPoints.empty() || LastImg.empty() || CurrImg.empty())
++        {
++            CurrentFrame.N = 0;
++            return 0;
++        }
++
+         if (LastImg.channels() > 1)
+             cv::cvtColor(LastImg, LastImg, cv::COLOR_BGR2GRAY);
+ 
+@@ -2040,15 +2052,26 @@ namespace ORB_SLAM3
+         cv::calcOpticalFlowPyrLK(LastImg, CurrImg, lastKeyPoints, currKeyPoints, status, error);
+         
+         // Remove points without match
+-        for (size_t i = 0; i < currKeyPoints.size(); i++)
++        for (size_t i = 0; i < currKeyPoints.size() && i < status.size() && i < lastMapPoints.size(); i++)
+         {
+-            if (status[i] && imMask.at<uchar>(currKeyPoints[i].y, currKeyPoints[i].x) == 0)
+-            {
+-                cv::KeyPoint kp(currKeyPoints[i], 1.0f);
+-                CurrentFrame.mvKeysUn.push_back(kp);
+-                CurrentFrame.mvpMapPoints.push_back(lastMapPoints[i]);
+-                nmatches++;
+-            }
++            const cv::Point2f& point = currKeyPoints[i];
++            if (!status[i] || !std::isfinite(point.x) || !std::isfinite(point.y))
++                continue;
++            if (point.x < 0.0f || point.y < 0.0f || point.x >= CurrImg.cols || point.y >= CurrImg.rows)
++                continue;
++
++            const int x = cvRound(point.x);
++            const int y = cvRound(point.y);
++            if (x < 0 || y < 0 || x >= CurrImg.cols || y >= CurrImg.rows)
++                continue;
++            if (!imMask.empty() && imMask.type() == CV_8UC1 && imMask.size() == CurrImg.size() &&
++                imMask.at<uchar>(y, x) != 0)
++                continue;
++
++            cv::KeyPoint kp(point, 1.0f);
++            CurrentFrame.mvKeysUn.push_back(kp);
++            CurrentFrame.mvpMapPoints.push_back(lastMapPoints[i]);
++            nmatches++;
+         }
+ 
+         // Update CurrentFrame attributes
+diff --git a/src/System.cc b/src/System.cc
+index 88043c1..706059d 100644
+--- a/src/System.cc
++++ b/src/System.cc
+@@ -40,7 +40,11 @@ Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
+ 
+ System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
+                const bool bUseViewer, const int initFr, const string &strSequence):
+-    mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false), mbResetActiveMap(false),
++    mSensor(sensor), mpVocabulary(nullptr), mpKeyFrameDatabase(nullptr), mpAtlas(nullptr),
++    mpTracker(nullptr), mpLocalMapper(nullptr), mpLoopCloser(nullptr), mpViewer(nullptr),
++    mpYOLO(nullptr), mpFrameDrawer(nullptr), mpMapDrawer(nullptr),
++    mptLocalMapping(nullptr), mptLoopClosing(nullptr), mptViewer(nullptr), mptYOLO(nullptr),
++    mbReset(false), mbResetActiveMap(false),
+     mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false), mbShutDown(false)
+ {
+     // Output welcome message
+@@ -519,6 +523,9 @@ void System::ResetActiveMap()
+ 
+ void System::Shutdown()
+ {
++    const bool calledFromViewer = mpViewer && mptViewer &&
++        mptViewer->get_id() == std::this_thread::get_id();
++
+     {
+         unique_lock<mutex> lock(mMutexReset);
+         mbShutDown = true;
+@@ -529,27 +536,25 @@ void System::Shutdown()
+     mpLocalMapper->RequestFinish();
+     mpLoopCloser->RequestFinish();
+     mpYOLO->RequestFinish();
+-    /*if(mpViewer)
+-    {
++    if(mpViewer)
+         mpViewer->RequestFinish();
+-        while(!mpViewer->isFinished())
+-            usleep(5000);
+-    }*/
+ 
+-    // Wait until all thread have effectively stopped
+-    /*while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
++    // The viewer can call Shutdown from its own Stop menu, so do not wait on
++    // that thread from itself. The main thread will join it after processing.
++    while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() ||
++          mpLoopCloser->isRunningGBA() || (!calledFromViewer && mpViewer && !mpViewer->isFinished()))
+     {
+-        if(!mpLocalMapper->isFinished())
+-            cout << "mpLocalMapper is not finished" << endl;*/
+-        /*if(!mpLoopCloser->isFinished())
+-            cout << "mpLoopCloser is not finished" << endl;
+-        if(mpLoopCloser->isRunningGBA()){
+-            cout << "mpLoopCloser is running GBA" << endl;
+-            cout << "break anyway..." << endl;
+-            break;
+-        }*/
+-        /*usleep(5000);
+-    }*/
++        usleep(5000);
++    }
++
++    if(mptLocalMapping && mptLocalMapping->joinable())
++        mptLocalMapping->join();
++    if(mptLoopClosing && mptLoopClosing->joinable())
++        mptLoopClosing->join();
++    if(mptYOLO && mptYOLO->joinable())
++        mptYOLO->join();
++    if(!calledFromViewer && mptViewer && mptViewer->joinable())
++        mptViewer->join();
+ 
+     if(!mStrSaveAtlasToFile.empty())
+     {
+@@ -557,9 +562,6 @@ void System::Shutdown()
+         SaveAtlas(FileType::BINARY_FILE);
+     }
+ 
+-    /*if(mpViewer)
+-        pangolin::BindToContext("ORB-SLAM2: Map Viewer");*/
+-
+ #ifdef REGISTER_TIMES
+     mpTracker->PrintTimeStats();
+ #endif
+diff --git a/src/Tracking.cc b/src/Tracking.cc
+index 283b6c2..61a4447 100644
+--- a/src/Tracking.cc
++++ b/src/Tracking.cc
+@@ -29,6 +29,7 @@
+ #include "MLPnPsolver.h"
+ #include "GeometricTools.h"
+ 
++#include <cmath>
+ #include <iostream>
+ 
+ #include <mutex>
+@@ -1558,8 +1559,8 @@ Sophus::SE3f Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, c
+ 
+     auto track_start = std::chrono::high_resolution_clock::now(); //****************************************
+ 
+-    bool RGBDInitialized = false;
+-    if(mFrameNum > 3) RGBDInitialized = true;
++    bool RGBDInitialized = mFrameNum > 3 && mLastFrameLK.isSet() &&
++                           mState != NO_IMAGES_YET && mState != NOT_INITIALIZED;
+ 
+     if(RGBDInitialized) mbStartOpticalFlow = true;
+     else mbStartOpticalFlow = false;
+@@ -1579,6 +1580,14 @@ Sophus::SE3f Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, c
+             {
+                 mImMask = outputYOLO[1];
+             }
++            else if(!mLastFrameLK.isSet())
++            {
++                // A map reset invalidates the pose used to preserve mask updates.
++                // Seed the dynamic mask again once asynchronous YOLO output arrives.
++                mImGrayLastKey = outputYOLO[0];
++                mImMaskLastKey = outputYOLO[1];
++                mImMask = outputYOLO[1];
++            }
+             else
+             {
+                 Eigen::Quaternionf q = mLastFrameLK.GetPose().unit_quaternion();
+@@ -1617,6 +1626,7 @@ Sophus::SE3f Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, c
+     else if(RGBDInitialized) mbNeedKF = NeedNewKeyFrame();
+ 
+     // Keyframe Tracking
++    unsigned long frameIdForLog = mFrameNum;
+     if(mbNeedKF)
+     {
+         Sophus::SE3f Tcw;
+@@ -1632,11 +1642,12 @@ Sophus::SE3f Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, c
+             mCurrentFrame = Frame(mImGray,mImDepth,mImMask,timestamp,mpORBextractorTmp,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth,mpCamera,!mbStartOpticalFlow,&mLastFrame,*mpImuCalib);
+ 
+         if(mbStartOpticalFlow) mCurrentFrame.SetPose(Tcw);
+-        
++        frameIdForLog = mCurrentFrame.mnId;
+         Track();
+     }
+     else
+     {
++        frameIdForLog = mCurrentFrame.mnId;
+         // Save camera trajectory.
+         if(!mCurrentFrame.mpReferenceKF) mCurrentFrame.mpReferenceKF = mpReferenceKF;
+         Sophus::SE3f Tcr_ = mCurrentFrame.GetPose() * mCurrentFrame.mpReferenceKF->GetPoseInverse();
+@@ -1646,22 +1657,41 @@ Sophus::SE3f Tracking::GrabImageRGBD(const cv::Mat &imRGB, const cv::Mat &imD, c
+         mlbLost.push_back(mState==LOST);
+     }
+ 
+-    mVelocityLK = mCurrentFrame.GetPose() * mLastFrameLK.GetPose().inverse();
+     mImGrayLastKey = mImGray.clone();
+     mImMaskLastKey = mImMask.clone();
+ 
+-    // Record last frame (used by TrackWithOpticalFlow)
+-    mImGrayLastLK = mImGray;
+-    mLastFrameLK = Frame(mCurrentFrame);
++    Sophus::SE3f currentPose;
++    if(mCurrentFrame.isSet())
++    {
++        currentPose = mCurrentFrame.GetPose();
++        if(RGBDInitialized && mLastFrameLK.isSet())
++            mVelocityLK = currentPose * mLastFrameLK.GetPose().inverse();
++        else
++            mVelocityLK = Sophus::SE3f();
++
++        // Record only valid frames for TrackWithOpticalFlow.
++        mImGrayLastLK = mImGray;
++        mLastFrameLK = Frame(mCurrentFrame);
++    }
++    else
++    {
++        // CreateMapInAtlas() clears mCurrentFrame. Do not copy that empty frame:
++        // its camera matrix and map-point references are not initialized.
++        mbStartOpticalFlow = false;
++        mVelocityLK = Sophus::SE3f();
++        mImGrayLastLK.release();
++        mLastFrameLK = Frame();
++    }
++
+     mFrameNum++;
+ 
+     auto track_end = std::chrono::high_resolution_clock::now(); //******************************************
+     std::chrono::duration<double, std::milli> track_duration = track_end - track_start;
+     mTotalTrackTime += track_duration.count();
+     std::cout << "Average processing time of GrabImageRGBD(): " << mTotalTrackTime / (double)(mFrameNum-1) << "ms" << std::endl;
+-    std::cout << "Frame " << mCurrentFrame.mnId << " end" << std::endl;
++    std::cout << "Frame " << frameIdForLog << " end" << std::endl;
+ 
+-    return mCurrentFrame.GetPose();
++    return currentPose;
+ }
+ 
+ 
+@@ -4300,6 +4330,13 @@ void Tracking::PredictCurrentMask()
+     std::vector<unsigned char> status;
+     std::vector<float> error;
+ 
++    if(mImGrayLastKey.empty() || mImMaskLastKey.empty() || mImGray.empty() ||
++       mImGrayLastKey.size() != mImMaskLastKey.size())
++    {
++        mImMask = cv::Mat::zeros(mImGray.size(), CV_8UC1);
++        return;
++    }
++
+     mImMask = cv::Mat::zeros(mImMaskLastKey.size(), CV_8UC1); // Static background is 0
+ 
+     // Apply erosion for last key frame mask
+@@ -4315,12 +4352,20 @@ void Tracking::PredictCurrentMask()
+     {
+         cv::calcOpticalFlowPyrLK(mImGrayLastKey, mImGray, lastDynaPoints, currDynaPoints, status, error);
+ 
+-        for(size_t j = 0; j < status.size(); ++j)
++        for(size_t j = 0; j < status.size() && j < currDynaPoints.size(); ++j)
+         {
+-            if(status[j]) 
++            const cv::Point2f& point = currDynaPoints[j];
++            if(status[j] && std::isfinite(point.x) && std::isfinite(point.y) &&
++               point.x >= 0.0f && point.y >= 0.0f &&
++               point.x < mImDepth2.cols && point.y < mImDepth2.rows)
+             {
+-                float depth = mImDepth2.at<float>(currDynaPoints[j].y, currDynaPoints[j].x);
+-                if (depth >= 0.05) trackedDynaPoints.push_back(cv::Point3f(currDynaPoints[j].x, currDynaPoints[j].y, depth));
++                const int x = cvRound(point.x);
++                const int y = cvRound(point.y);
++                if(x < 0 || y < 0 || x >= mImDepth2.cols || y >= mImDepth2.rows)
++                    continue;
++
++                float depth = mImDepth2.at<float>(y, x);
++                if (depth >= 0.05) trackedDynaPoints.push_back(cv::Point3f(point.x, point.y, depth));
+             }
+         }
+ 
+diff --git a/src/Viewer.cc b/src/Viewer.cc
+index 6a9c30b..0afe398 100644
+--- a/src/Viewer.cc
++++ b/src/Viewer.cc
+@@ -19,6 +19,7 @@
+ 
+ #include "Viewer.h"
+ #include <pangolin/pangolin.h>
++#include <opencv2/highgui.hpp>
+ 
+ #include <mutex>
+ 
+@@ -394,6 +395,8 @@ void Viewer::Run()
+             break;
+     }
+ 
++    cv::destroyAllWindows();
++    pangolin::DestroyWindow("ORB-SLAM3: Map Viewer");
+     SetFinish();
+ }
+ 

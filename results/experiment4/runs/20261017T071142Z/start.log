@@ -1,0 +1,17 @@
+run_dir=/home/public/Workspace/Code/Project/Embodied_AI/Visual/SLAM_ORB/results/experiment4/runs/20261017T071142Z
+cuda_architectures=120
+build_jobs=4
+GPU 0: NVIDIA GeForce RTX 5070 Laptop GPU (UUID: GPU-168ef688-7afe-dda9-d98e-54aeeed67d27)
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2026 NVIDIA Corporation
+Built on Tue_Sep_01_08:45:21_PDT_2026
+Cuda compilation tools, release 13.4, V13.4.92
+Build cuda_13.4.r13.4/compiler.38855100_0
+Cloning into '/home/public/Workspace/Code/Project/Embodied_AI/Visual/SLAM_ORB/source/DCH-SLAM'...
+source_revision=199a02517949afe8b4cd20aad8ab6e6ad51d3de5
+dbow2_dependency=copied from /home/public/Workspace/Code/Project/Embodied_AI/Visual/SLAM_ORB/source/ORB_SLAM3/Thirdparty/DBoW2
+archive_sha256=ff2d0e82a69a8f4c5c002e3a0dff82a00e5872e1659fac1b996f41166b92693b
+vocabulary=/home/public/Workspace/Code/Project/Embodied_AI/Visual/SLAM_ORB/data/processed/ORBvoc.txt
+vocabulary_sha256=f8dd027f7a6cb88129821341194d7f2c75b77b3394257ddd0d2229863d1a3570
+vocabulary_bytes=145250924
+错误：配置的 Camera.fx 与 fr1/desk 不一致。

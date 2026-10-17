@@ -1,0 +1,58 @@
+%YAML:1.0
+
+#--------------------------------------------------------------------------------------------
+# Camera Parameters — Bonn RGB-D Dynamic Dataset
+# Sensor: Asus Xtion Pro (same class as TUM Kinect)
+# Source: https://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/
+#--------------------------------------------------------------------------------------------
+File.version: "1.0"
+
+Camera.type: "PinHole"
+
+Camera1.fx: 542.822841
+Camera1.fy: 542.576870
+Camera1.cx: 315.593520
+Camera1.cy: 237.756098
+
+Camera1.k1: 0.039903
+Camera1.k2: -0.099343
+Camera1.p1: -0.000730
+Camera1.p2: -0.000144
+
+Camera.width: 640
+Camera.height: 480
+
+Camera.fps: 30
+
+# Color order of the images (0: BGR, 1: RGB)
+Camera.RGB: 1
+
+Stereo.ThDepth: 40.0
+Stereo.b: 0.0747
+
+# Depth map values factor — same as TUM (Kinect/Xtion: 0.2mm per unit = 5000 per meter)
+# If trajectory looks wrong, try 1000.0 instead.
+RGBD.DepthMapFactor: 5000.0
+
+#--------------------------------------------------------------------------------------------
+# ORB Parameters
+#--------------------------------------------------------------------------------------------
+ORBextractor.nFeatures: 1000
+ORBextractor.scaleFactor: 1.2
+ORBextractor.nLevels: 8
+ORBextractor.iniThFAST: 20
+ORBextractor.minThFAST: 7
+
+#--------------------------------------------------------------------------------------------
+# Viewer Parameters
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1.0
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2.0
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3.0
+Viewer.ViewpointX: 0.0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500.0

@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "version": "v2_cuda_success_20261017",
+  "created_utc": "2026-10-17T08:36:36.430672+00:00",
+  "accepted_run_id": "20261017T082609Z",
+  "status": "success",
+  "exit_code": 0,
+  "code": {
+    "upstream_repository": "https://github.com/datrich/DCH-SLAM",
+    "upstream_revision": "199a02517949afe8b4cd20aad8ab6e6ad51d3de5",
+    "local_patch": "versions/v2_cuda_success_20261017/DCH-SLAM.patch",
+    "local_patch_sha256": "7b6faf61d15ef92bea68e84fbfa49c09bfecd42a98017e9c8ae4d8432cd1792f",
+    "modified_tracked_files": [
+      "CMakeLists.txt",
+      "src/ORBmatcher.cc",
+      "src/System.cc",
+      "src/Tracking.cc",
+      "src/Viewer.cc"
+    ],
+    "patch_restore_check": "applied to upstream-file copy and byte-compared with current source; passed"
+  },
+  "environment": {
+    "gpu": "NVIDIA GeForce RTX 5070 Laptop GPU",
+    "cuda_toolkit": "13.4",
+    "nvcc": "13.4.92",
+    "cuda_architectures": "120",
+    "driver_version": "not captured",
+    "conda_environment": "cuda_134",
+    "os": "Ubuntu 26.04.1",
+    "gcc": "15.2.0",
+    "cmake": "3.31.6",
+    "opencv": "4.10.0",
+    "eigen": "3.4",
+    "pangolin": "v0.6 (project prefix build/deps)",
+    "cxx_standard": 14,
+    "use_cuda_frontend": true
+  },
+  "dataset": {
+    "sequence": "TUM fr1/desk",
+    "rgb_images": 613,
+    "depth_images": 595,
+    "ground_truth_poses": 2335,
+    "associated_rgbd_frames": 573,
+    "archive_sha256": "e983d6830916e66dc4a46a71368046b149b283de87769690e7aa4e0b9483530c"
+  },
+  "result": {
+    "processed_frames": 573,
+    "camera_poses": 573,
+    "keyframe_poses": 402,
+    "ground_truth_matches": 573,
+    "ate_alignment": "SE(3) Umeyama, no scale fitting",
+    "timestamp_tolerance_s": 0.02,
+    "ate_rmse_m": 0.023424,
+    "ate_mean_m": 0.020784,
+    "ate_median_m": 0.018131,
+    "ate_p95_m": 0.040994,
+    "ate_max_m": 0.062791,
+    "track_rgbd_mean_ms": 39.2928,
+    "track_rgbd_median_ms": 43.1605,
+    "optical_flow_failure_messages": 0,
+    "local_map_failure_messages": 0,
+    "map_creations": 1
+  },
+  "archive": {
+    "path": "versions/v2_cuda_success_20261017.tar.gz",
+    "purpose": "recovery in original project location and Linux dependency environment",
+    "includes": [
+      "launcher and helper scripts",
+      "patched DCH-SLAM source, vendor dependencies, models, vocabulary archive and binaries",
+      "build/deps Pangolin installation",
+      "experiment reports and saved run evidence"
+    ],
+    "excludes": [
+      "TUM dataset",
+      "processed vocabulary",
+      "full CMake build caches",
+      "CPU baseline source",
+      ".git",
+      "Matplotlib/Python caches",
+      "run-directory Thirdparty absolute symlinks",
+      "version archive files",
+      "Prompt/ and docs/ directories",
+      "private agent state",
+      "task plan",
+      "nested Git metadata",
+      "original screencast containing local path details"
+    ],
+    "checksum_file": "versions/v2_cuda_success_20261017/files.sha256",
+    "symlinks": {}
+  },
+  "known_issues": [
+    "Nonfatal Qt timer/QSocketNotifier messages remain despite exit code 0",
+    "Accepted run does not exercise LOST/new-map recovery; forced recovery and GPU sanitizer not run",
+    "Only one static TUM sequence; no CUDA vs CPU benchmark or navigation validation",
+    "Other machines, Wayland/headless and live cameras not validated"
+  ],
+  "provenance_files": {
+    "start.sh": {
+      "sha256": "ca745d44503e7bc74387e5356a7645f5313b99d3c457385d70e1a5f23375b494",
+      "bytes": 17443
+    },
+    "source/DCH-SLAM/CMakeLists.txt": {
+      "sha256": "7363fc9ef17398560eb740fe1ccf28402509098f7676728af9c856a6338475d5",
+      "bytes": 13767
+    },
+    "source/DCH-SLAM/src/ORBmatcher.cc": {
+      "sha256": "4ca08e54e68813ce01093addc9c9e92e9968ba60485b2cb31d8fef1a07271b99",
+      "bytes": 76967
+    },
+    "source/DCH-SLAM/src/System.cc": {
+      "sha256": "d7eadbe953f26468069ae52fab04ed69da38440d100d35e5333ea7e38603234c",
+      "bytes": 52638
+    },
+    "source/DCH-SLAM/src/Tracking.cc": {
+      "sha256": "8d91530dc3a7b1becbb73857425e22d70bdc2abe11e2b2154ccac9e4b42a18b0",
+      "bytes": 159780
+    },
+    "source/DCH-SLAM/src/Viewer.cc": {
+      "sha256": "b9a977919d0654190adf0bb241190bbd7d3fbcc8dcefdeac49b0766712dfeab2",
+      "bytes": 13501
+    },
+    "source/DCH-SLAM/Examples/RGB-D/TUM1.yaml": {
+      "sha256": "6d0037d5d82a6cdf212f4552f69eacce77745ad9229f0f2846ba8d86dfde6e17",
+      "bytes": 2127
+    },
+    "source/DCH-SLAM/Examples/RGB-D/rgbd_tum": {
+      "sha256": "832ea887af6b6e0af7345ec123be78ca6151cea14ecdb441b143537650602159",
+      "bytes": 373480
+    },
+    "source/DCH-SLAM/lib/libORB_SLAM3.so": {
+      "sha256": "b66ea86ce8abb12b96a27b1def00e1436744f7be53e9fb09b5b696e75d029b8c",
+      "bytes": 6047216
+    },
+    "source/DCH-SLAM/Thirdparty/DBoW2/lib/libDBoW2.so": {
+      "sha256": "24f00b2d815357c10e8a8691086a47c7bdefe3fd7cd593e4d0ccb5c98bb0a256",
+      "bytes": 78488
+    },
+    "source/DCH-SLAM/Thirdparty/g2o/lib/libg2o.so": {
+      "sha256": "892a41a15a9fc2fe9da3fe0c28bd07b060e53d604c4d40dfdd3c98d2f1645cfa",
+      "bytes": 788744
+    },
+    "source/DCH-SLAM/Vocabulary/ORBvoc.txt.tar.gz": {
+      "sha256": "ff2d0e82a69a8f4c5c002e3a0dff82a00e5872e1659fac1b996f41166b92693b",
+      "bytes": 42527984
+    },
+    "source/DCH-SLAM/Thirdparty/YOLO/coco.names": {
+      "sha256": "634a1132eb33f8091d60f2c346ababe8b905ae08387037aed883953b7329af84",
+      "bytes": 625
+    },
+    "source/DCH-SLAM/Thirdparty/YOLO/yolo-fastest-xl.cfg": {
+      "sha256": "036f1def6b96271bd6ec590dca80e833323d324e99450ec9aa5375f0b826d18b",
+      "bytes": 9701
+    },
+    "source/DCH-SLAM/Thirdparty/YOLO/yolo-fastest-xl.weights": {
+      "sha256": "eb37bc51b21efc53f383de29b7504f818b1a9cb9949a2d62b332ba56e44a4027",
+      "bytes": 3650764
+    },
+    "associations/fr1_desk.txt": {
+      "sha256": "86dfcf237cf092cc7466ee2c67dfc0a3a507fe879a1bbe063b962d8a7442c536",
+      "bytes": 51570
+    },
+    "results/experiment4/runs/20261017T082609Z/CameraTrajectory.txt": {
+      "sha256": "4c96a2d34b3d40b8f4c41a32479408aed200793998d9ccd34510cdb35d5ab445",
+      "bytes": 60458
+    },
+    "results/experiment4/runs/20261017T082609Z/KeyFrameTrajectory.txt": {
+      "sha256": "3bfc01b784967b59478e3fe935aeeba3bd337ec212cce3864f396fdc03207983",
+      "bytes": 36708
+    },
+    "results/experiment4/runs/20261017T082609Z/slam.log": {
+      "sha256": "8d66d3522d0512c0eca6ee4102c48742611348eb5ea053ae967fee5e11b997d9",
+      "bytes": 41234
+    },
+    "results/experiment4/runs/20261017T082609Z/start.log": {
+      "sha256": "6d9025ec8ce9f374116c1bd3df9693582fb40c63de33a27a5cbd398e6a43298e",
+      "bytes": 45588
+    },
+    "results/experiment4/runs/20261017T082609Z/status.txt": {
+      "sha256": "972adf3cf31834ae2f27b139b29b36e051cea4b42d954571f681a6f5c284a52f",
+      "bytes": 27
+    },
+    "versions/v2_cuda_success_20261017/DCH-SLAM.patch": {
+      "sha256": "7b6faf61d15ef92bea68e84fbfa49c09bfecd42a98017e9c8ae4d8432cd1792f",
+      "bytes": 13381
+    }
+  }
+}

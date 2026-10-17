@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_G.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_G.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_L.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_L.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_MS.cpp.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_MS.cpp.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_MS.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_apply_NMS_MS.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_compute_score.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_compute_score.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_obtain_keypoints.cpp.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_obtain_keypoints.cpp.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_orientation.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_FAST_orientation.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_bitpattern.cpp.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_bitpattern.cpp.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_copy_output.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_copy_output.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_descriptor.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_descriptor.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_gaussian.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_gaussian.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_gpu.cpp.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_gpu.cpp.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_matcher.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_matcher.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_pyramid.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_pyramid.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_stereo_match.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/orb_stereo_match.cu.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/synced_mem_holder.cpp.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/synced_mem_holder.cpp.o.d"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/tracking_isinfrustum.cu.o"
+  "CMakeFiles/orbslam3_cuda.dir/src/cuda/tracking_isinfrustum.cu.o.d"
+  "liborbslam3_cuda.a"
+  "liborbslam3_cuda.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CUDA CXX)
+  include(CMakeFiles/orbslam3_cuda.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

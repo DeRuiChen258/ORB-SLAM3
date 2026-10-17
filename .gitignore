@@ -1,5 +1,15 @@
-# Object file
-*.o
+# Never publish internal workflow state or prompt/document directories
+/.agent/
+/.agents/
+/.aws/
+/.codex/
+/Prompt/
+/docs/
 
-# Ada Library Information
-*.ali
+# Nested repository metadata and Python caches
+**/.git/
+__pycache__/
+*.py[cod]
+
+# Original screencast is intentionally omitted; use the anonymized GIF
+/Screencast From 2026-10-17 16-29-26.mp4

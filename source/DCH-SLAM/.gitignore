@@ -1,0 +1,43 @@
+# Build artifacts
+build/
+build_old/
+build_new/
+lib/
+bin/
+
+# Large vocabulary and dataset files (download separately)
+Vocabulary/ORBvoc.txt
+Vocabulary/*.txt
+Examples*/*/TUM_IMU/
+Examples*/*/EuRoC/
+evaluation/
+# *.tar.gz
+
+# YOLO models (large binaries)
+Thirdparty/YOLO/*.weights
+Thirdparty/YOLO/*.cfg.bak
+Thirdparty/YOLO/*.onnx
+
+# Backup and temp files
+*.barron_backup
+*.orig
+*.bak
+
+# Compiled objects
+*.o
+*.a
+*.so
+*.so.*
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~

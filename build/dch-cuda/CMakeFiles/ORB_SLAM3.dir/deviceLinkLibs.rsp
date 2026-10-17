@@ -1,0 +1,1 @@
+  -L"/usr/local/cuda-13.4/targets/x86_64-linux/lib/stubs"  -L"/usr/local/cuda-13.4/targets/x86_64-linux/lib"   -lboost_serialization -lcrypto liborbslam3_cuda.a -lOpenGL -lGLX -lGLU -lGLEW -lEGL -lSM -lICE -lX11 -lXext -lrt -lpthread -ldl "/usr/local/cuda-13.4/targets/x86_64-linux/lib/libculibos.a" -lcudadevrt -lcudart_static 
